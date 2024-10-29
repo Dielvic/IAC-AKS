@@ -46,7 +46,7 @@ jobs:
         # Supports fetching the packages. Not just the package.json git refs of legacy, but onerail scripts pulling packages.
 #        uses: webfactory/ssh-agent@v0.9.0
 #        with:
-#         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
