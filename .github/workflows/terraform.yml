@@ -4,12 +4,12 @@ on: [push, pull_request]
 
 jobs: 
     Terraform-Docs:
-        uses: iac-aks/.github/.github/.github/workflows/terraform-docs.yml@feature1
+        uses: Dielvic/iac-aks/.github/.github/workflows/terraform-docs.yml@feature1
         if: github.event_name == 'pull_request'
         with:
             os_version: "ubuntu-latest"
     Terraform:
-        uses: iac-aks/.github/.github/.github/workflows/reusable-terraform.yml@feature1
+        uses: Dielvic/iac-aks.github/.github/workflows/reusable-terraform.yml@feature1
         with:
             os_version: "ubuntu-latest"
             environment: "prod"
