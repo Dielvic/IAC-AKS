@@ -1,0 +1,144 @@
+name: "Terraform"
+
+on:
+  workflow_call:
+    inputs:
+      os_version:
+        description: "OS version to run the job"
+        default: "ubuntu-latest"
+        required: true
+        type: string
+      environment:
+        description: "environment to run the job"
+        default: "prod"
+        required: true
+        type: string
+    secrets:
+      ARM_CLIENT_ID:
+        required: true
+      ARM_CLIENT_SECRET:
+        required: true
+      ARM_TENANT_ID:
+        required: true
+      SSH_PRIVATE_KEY:
+        required: true
+
+jobs: 
+  output-plan:
+    name: "Terraform"
+    runs-on: ${{ inputs.os_version }}
+    environment: ${{ inputs.environment }}  
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+      pull-requests: write
+      # Write access for security-events is only required for customers looking for MSDO results to appear in the codeQL security alerts tab on GitHub (Requires GHAS)
+      security-events: write
+    defaults:
+        run:
+            shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+#      - name: Add ssh key to ssh-agent
+        # Supports fetching the packages. Not just the package.json git refs of legacy, but onerail scripts pulling packages.
+#        uses: webfactory/ssh-agent@v0.9.0
+#        with:
+#         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        id: init
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CREDENTIALS.clientId }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CREDENTIALS.clientSecret }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_CREDENTIALS.tenantId }}
+        run: 
+          terraform init -backend-config="env/${{ inputs.environment }}/backend.hcl"
+                          
+        # Run a terraform fmt to check syntax
+      - name: Terraform Format
+        id: fmt
+        if: github.ref != 'refs/heads/main'
+        run: terraform fmt -check
+
+        # Run a terraform validate
+      - name: Terraform Validate
+        id: validate
+        if: github.ref != 'refs/heads/main' && (success() || failure())
+        # Run even if formatting fails
+        run: terraform validate -no-color
+     
+        # Run a terraform plan
+      - name: Terraform Plan
+        id: plan
+        if: github.event_name == 'pull_request'
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        run: terraform plan -no-color -var-file="env/${{ inputs.environment }}/terraform.tfvars" -out=tfplan
+       
+      - name: Run Microsoft Security DevOps
+        uses: microsoft/security-devops-action@latest
+        id: msdo
+        if: github.event_name == 'pull_request'
+        # with:
+        # config: string. Optional. A file path to an MSDO configuration file ('*.gdnconfig').
+        # policy: 'GitHub' | 'microsoft' | 'none'. Optional. The name of a well-known Microsoft policy. If no configuration file or list of tools is provided, the policy may instruct MSDO which tools to run. Default: GitHub.
+        # categories: string. Optional. A comma-separated list of analyzer categories to run. Values: 'code', 'artifacts', 'IaC', 'containers'. Example: 'IaC, containers'. Defaults to all.
+        # languages: string. Optional. A comma-separated list of languages to analyze. Example: 'javascript,typescript'. Defaults to all.
+        # tools: string. Optional. A comma-separated list of analyzer tools to run. Values: 'bandit', 'binskim', 'checkov', 'eslint', 'templateanalyzer', 'terrascan', 'trivy'.
+
+        # Upload alerts to the Security tab - required for MSDO results to appear in the codeQL security alerts tab on GitHub (Requires GHAS)
+        # - name: Upload alerts to Security tab
+        #  uses: github/codeql-action/upload-sarif@v3
+        #  with:
+        #    sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+
+        # Upload alerts file as a workflow artifact - required for MSDO results to appear in the codeQL security alerts tab on GitHub (Requires GHAS)
+        # - name: Upload alerts file as a workflow artifact
+        #  uses: actions/upload-artifact@v3
+        #  with:  
+        #    name: alerts
+        #    path: ${{ steps.msdo.outputs.sarifFile }}
+
+       # Add a comment to pull requests with plan results
+      - name: Add Plan Comment
+        id: comment
+        if: github.event_name == 'pull_request' && (success() || failure())
+        uses: actions/github-script@v6
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+       
+            Show Plan
+           
+            \`\`\`${process.env.PLAN}\`\`\`
+               
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+             
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+          # On merge to main apply changes
+      - name: Terraform Apply
+        id: apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+            ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+            ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+            ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        run: terraform apply -var-file="env/${{ inputs.environment }}/terraform.tfvars" -auto-approve

@@ -1,0 +1,19 @@
+name: "Terraform"
+
+on: [push, pull_request]
+
+jobs: 
+    Terraform-Docs:
+        uses: pulsivit/.github/.github/workflows/terraform-docs.yml@main
+        if: github.event_name == 'pull_request'
+        with:
+            os_version: "ubuntu-latest"
+    Terraform:
+        uses: pulsivit/.github/.github/workflows/reusable-terraform.yml@main
+        with:
+            os_version: "ubuntu-latest"
+            environment: "prod"
+        secrets:
+            ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+            ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+            ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
