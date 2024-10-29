@@ -20,8 +20,8 @@ on:
         required: true
       ARM_TENANT_ID:
         required: true
-      SSH_PRIVATE_KEY:
-        required: true
+#      SSH_PRIVATE_KEY:
+#        required: true
 
 jobs: 
   output-plan:
