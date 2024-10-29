@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs: 
     Terraform-Docs:
-        uses: ./.github/.github/workflows/terraform-docs.yml
+        uses: ./.github/workflows/terraform-docs.yml
         if: github.event_name == 'pull_request'
         with:
             os_version: "ubuntu-latest"
