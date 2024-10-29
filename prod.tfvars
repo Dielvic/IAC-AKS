@@ -1,0 +1,1 @@
+osDiskSizeGB= 64
