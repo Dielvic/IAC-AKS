@@ -20,6 +20,8 @@ on:
         required: true
       ARM_TENANT_ID:
         required: true
+      ARM_SUBSCRIPTION_ID:
+        required: true 
 #      SSH_PRIVATE_KEY:
 #        required: true
 
@@ -58,6 +60,7 @@ jobs:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         run: 
           terraform init 
                           
@@ -82,6 +85,7 @@ jobs:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         run: terraform plan -no-color -var-file="env/${{ inputs.environment }}/terraform.tfvars" -out=tfplan
        
       - name: Run Microsoft Security DevOps
@@ -142,4 +146,5 @@ jobs:
             ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
             ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
             ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+            ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         run: terraform apply -var-file="env/${{ inputs.environment }}/terraform.tfvars" -auto-approve
