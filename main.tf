@@ -1,5 +1,5 @@
 data "http" "aksc_release" {
-  url = "https://github.com/Azure/AKS-Construction/releases/download/0.10.7/main.json"
+  url = "https://raw.githubusercontent.com/Dielvic/IAC-AKS/refs/heads/main/main.json"
   request_headers = {
     Accept     = "application/json"
     User-Agent = "request module"
