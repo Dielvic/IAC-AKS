@@ -14,7 +14,7 @@ provider "azurerm" {
   features {}
 }
 
-     # The configuration for the `remote` backend.
+# The configuration for the `remote` backend.
 #     terraform {
 #       backend "remote" {
 #         # The name of your Terraform Cloud organization.
@@ -29,9 +29,9 @@ provider "azurerm" {
 
 terraform {
   backend "azurerm" {
-    resource_group_name   = "rg-aks-prerequis"
-    storage_account_name  = "stockageterraform2910"
-    container_name        = "terraform-state"
-    key                   = "terraform.tfstate"  # Nom du fichier état stocké
+    resource_group_name  = "rg-aks-prerequis"
+    storage_account_name = "stockageterraform2910"
+    container_name       = "terraform-state"
+    key                  = "terraform.tfstate" # Nom du fichier état stocké
   }
 }
