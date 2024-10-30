@@ -35,7 +35,3 @@ terraform {
     key                  = "terraform.tfstate" # Nom du fichier état stocké
   }
 }
-
-provider "azurerm" {
-  resource_provider_registrations = "none"
-}
