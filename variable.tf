@@ -17,10 +17,10 @@ variable "agentCount" {
   default = 1
 }
 
-variable agentCountMax {
-  type=number
-  default=3
-} 
+variable "agentCountMax" {
+  type    = number
+  default = 3
+}
 
 variable "agentVMSize" {
   type    = string
@@ -34,10 +34,10 @@ variable "osDiskSizeGB" {
   type    = number
   default = 32
 }
-variable networkPlugin {
-  type=string
-  default="kubenet"
-} 
+variable "networkPlugin" {
+  type    = string
+  default = "kubenet"
+}
 
 variable "automationAccountScheduledStartStop" {
   type    = string
