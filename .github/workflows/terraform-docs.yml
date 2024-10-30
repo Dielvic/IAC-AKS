@@ -1,0 +1,38 @@
+name: Generate terraform docs
+on:
+    workflow_call:
+        inputs:
+            os_version:
+                description: "OS version to run the job"
+                default: "ubuntu-latest"
+                required: true
+                type: string
+            recursive:
+                description: "Recursively render all modules"
+                default: "false"
+                required: false
+                type: string
+            recursive-path:
+                description: "Path to the module to render recursively"
+                default: "."
+                required: false
+                type: string
+            
+            
+jobs:
+  docs:
+    runs-on: ${{ inputs.os_version }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
+
+    - name: Render terraform docs inside the README.md and push changes back to PR branch
+      uses: terraform-docs/gh-actions@v1.3.0
+      with:
+        working-dir: .
+        output-file: README.md
+        output-method: inject
+        git-push: "true"
+        recursive: ${{ inputs.recursive }}
+        recursive-path: ${{ inputs.recursive-path }}
