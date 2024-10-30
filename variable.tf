@@ -1,5 +1,5 @@
 #variables.tf
-
+# Si on crée un .tfvars, les valeurs default y seront inscrites
 variable "resourceGroupName" {
   type    = string
   default = "az-k8s-dvc-rg"
@@ -14,8 +14,14 @@ variable "resourceName" {
 }
 variable "agentCount" {
   type    = number
-  default = 2
+  default = 1
 }
+
+variable agentCountMax {
+  type=number
+  default=3
+} 
+
 variable "agentVMSize" {
   type    = string
   default = "Standard_B2ls_v2"
@@ -28,6 +34,11 @@ variable "osDiskSizeGB" {
   type    = number
   default = 32
 }
+variable networkPlugin {
+  type=string
+  default="kubenet"
+} 
+
 variable "automationAccountScheduledStartStop" {
   type    = string
   default = "Weekday"
