@@ -137,6 +137,8 @@ jobs:
               repo: context.repo.repo,
               body: output
             });
+            
+        continue-on-error: true    
 
           # On merge to main apply changes
       - name: Terraform Apply
