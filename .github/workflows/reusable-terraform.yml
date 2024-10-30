@@ -113,6 +113,7 @@ jobs:
         #    path: ${{ steps.msdo.outputs.sarifFile }}
 
        # Add a comment to pull requests with plan results
+        continue-on-error: true   
       - name: Add Plan Comment
         id: comment
         if: github.event_name == 'pull_request' && (success() || failure())
