@@ -1,5 +1,3 @@
-#main.tf
-
 data "http" "aksc_release" {
   url = "https://github.com/Azure/AKS-Construction/releases/download/0.10.7/main.json"
   request_headers = {
@@ -23,9 +21,10 @@ resource "azurerm_resource_group_template_deployment" "aksc_deploy" {
   parameters_content = jsonencode({
     resourceName                        = { value = var.resourceName }
     agentCount                          = { value = var.agentCount }
-    agentVMSize                         = { value = var.agentVMSize }
+    agentCountMax                       = { value = var.agentCountMax }
     osDiskType                          = { value = var.osDiskType }
     osDiskSizeGB                        = { value = var.osDiskSizeGB }
+    networkPlugin                       = { value = var.networkPlugin }
     automationAccountScheduledStartStop = { value = var.automationAccountScheduledStartStop }
   })
 }
