@@ -1,0 +1,3 @@
+[submodule "libs/ticket-app"]
+	path = libs/ticket-app
+	url = https://github.com/Dielvic/ticket-app.git
